@@ -6,4 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="8.8.0" />
+    <PackageReference Include="Flurl" Version="4.0.0" />
+    <PackageReference Include="Flurl.Http" Version="4.0.2" />
+    <PackageReference Include="NUnit" Version="4.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ConsumerViaCep.Domain\ConsumerViaCep.Domain.csproj" />
+    <ProjectReference Include="..\ConsumerViaCep.Infrastructure\ConsumerViaCep.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
