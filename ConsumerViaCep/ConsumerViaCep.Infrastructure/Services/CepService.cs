@@ -1,6 +1,7 @@
 ﻿using ConsumerViaCep.Domain.Interfaces;
 using ConsumerViaCep.Domain.Models;
-using System.ComponentModel.Design;
+using Flurl;
+using Flurl.Http;
 
 namespace ConsumerViaCep.Infrastructure.Services;
 
