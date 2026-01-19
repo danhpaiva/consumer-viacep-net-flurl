@@ -1,4 +1,4 @@
-﻿namespace ConsumerViaCep.Domain;
+﻿namespace ConsumerViaCep.Domain.Models;
 
 public class ViaCepResponse
 {
