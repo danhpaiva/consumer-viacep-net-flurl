@@ -1,95 +1,93 @@
-﻿using ConsumerViaCep.Domain.Interfaces;
-using ConsumerViaCep.Domain.Models;
+﻿using ConsumerViaCep.Domain.Models;
 using ConsumerViaCep.Infrastructure.Services;
 using Flurl.Http;
 using Flurl.Http.Testing;
-using NUnit.Framework;
-using FluentAssertions;
+using Xunit;
 
 namespace ConsumerViaCep.Tests;
 
-[TestFixture]
-public class CepServiceTests
+public class CepServiceTests : IDisposable
 {
-    private ICepService _sut;
+    private readonly CepService _sut;
+    private readonly HttpTest _httpTest;
 
-    [SetUp]
-    public void Setup()
+    public CepServiceTests()
     {
         _sut = new CepService();
+        _httpTest = new HttpTest(); // Intercepta todas as chamadas HTTP durante o teste
     }
 
-    [Test]
-    public async Task GetAddressByCepAsync_ShouldReturnCorrectData_WhenCepIsValid()
+    // O xUnit executa o Dispose após cada teste, garantindo que o HttpTest seja limpo
+    public void Dispose()
     {
-        using var httpTest = new HttpTest();
+        _httpTest.Dispose();
+    }
 
+    [Fact]
+    public async Task GetAddressByCepAsync_DeveRetornarDadosCorretos_QuandoCepValido()
+    {
         // Arrange
-        var mockResponse = new ViaCepResponse
+        var mock = new ViaCepResponse
         {
             Cep = "01001-000",
             Logradouro = "Praça da Sé",
             Localidade = "São Paulo"
         };
-        httpTest.RespondWithJson(mockResponse);
+        _httpTest.RespondWithJson(mock);
 
         // Act
         var result = await _sut.GetAddressByCepAsync("01001000");
 
-        // Assert
-        result.Should().NotBeNull();
-        result.Cep.Should().Be("01001-000");
-        result.Localidade.Should().Be("São Paulo");
+        // Assert (Nativo xUnit)
+        Assert.NotNull(result);
+        Assert.Equal("01001-000", result.Cep);
+        Assert.Equal("São Paulo", result.Localidade);
 
-        httpTest.ShouldHaveCalled("https://viacep.com.br/ws/01001000/json")
-                .WithVerb(HttpMethod.Get);
+        // Assert (Nativo Flurl para verificar se a chamada foi correta)
+        _httpTest.ShouldHaveCalled("https://viacep.com.br/ws/01001000/json")
+                 .WithVerb(HttpMethod.Get);
     }
 
-    [Test]
-    public async Task GetAddressByCepAsync_ShouldHandleNotFoundError()
+    [Fact]
+    public async Task GetAddressByCepAsync_DeveRetornarErroTrue_QuandoCepNaoExistir()
     {
-        using var httpTest = new HttpTest();
-
-        // Arrange: ViaCep retorna 200 OK com campo "erro: true" para CEPs inexistentes
-        httpTest.RespondWithJson(new { erro = true });
+        // Arrange (ViaCep retorna 200 OK mas com erro: true no corpo)
+        _httpTest.RespondWithJson(new { erro = true });
 
         // Act
         var result = await _sut.GetAddressByCepAsync("99999999");
 
         // Assert
-        result.Erro.Should().BeTrue();
+        Assert.True(result.Erro);
     }
 
-    [Test]
-    public void GetAddressByCepAsync_ShouldThrowException_WhenCepIsEmpty()
+    [Fact]
+    public async Task GetAddressByCepAsync_DeveLancarExcecao_QuandoCepForVazio()
     {
         // Act & Assert
-        Assert.ThrowsAsync<ArgumentException>(async () =>
-            await _sut.GetAddressByCepAsync(""));
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.GetAddressByCepAsync(""));
     }
 
-    [Test]
-    public async Task GetAddressByCepAsync_ShouldRetryOnInternalServerError()
+    [Fact]
+    public async Task GetAddressByCepAsync_DeveLancarFlurlException_QuandoApiFalhar()
     {
-        using var httpTest = new HttpTest();
-
-        // Arrange: Simula uma falha 500
-        httpTest.RespondWith("Internal Server Error", 500);
+        // Arrange
+        _httpTest.RespondWith("Erro Interno", 500);
 
         // Act & Assert
-        Func<Task> act = async () => await _sut.GetAddressByCepAsync("01001000");
-        await act.Should().ThrowAsync<FlurlHttpException>();
+        await Assert.ThrowsAsync<FlurlHttpException>(() => _sut.GetAddressByCepAsync("01001000"));
     }
 
-    [Test]
-    public async Task GetAddressByCepAsync_ShouldHaveCorrectUrlStructure()
+    [Fact]
+    public async Task GetAddressByCepAsync_DeveRespeitarEstruturaDaUrl()
     {
-        using var httpTest = new HttpTest();
-        httpTest.RespondWithJson(new { });
+        // Arrange
+        _httpTest.RespondWithJson(new { });
 
-        await _sut.GetAddressByCepAsync("04101300");
+        // Act
+        await _sut.GetAddressByCepAsync("12345678");
 
-        // Verifica se a URL foi montada exatamente como a API exige
-        httpTest.ShouldHaveCalled("*/04101300/json");
+        // Assert
+        _httpTest.ShouldHaveCalled("*/12345678/json");
     }
 }
