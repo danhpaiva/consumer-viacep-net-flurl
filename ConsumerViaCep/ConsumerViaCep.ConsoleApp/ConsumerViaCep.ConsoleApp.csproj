@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ConsumerViaCep.Application\ConsumerViaCep.Application.csproj" />
     <ProjectReference Include="..\ConsumerViaCep.Infrastructure\ConsumerViaCep.Infrastructure.csproj" />
   </ItemGroup>
 

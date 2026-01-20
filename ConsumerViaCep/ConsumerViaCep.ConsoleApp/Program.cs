@@ -1,14 +1,37 @@
-﻿using ConsumerViaCep.Domain.Interfaces;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ConsumerViaCep.Domain.Interfaces;
 using ConsumerViaCep.Infrastructure.Services;
-using Microsoft.Extensions.DependencyInjection;
+using ConsumerViaCep.Application.Interfaces;
+using ConsumerViaCep.Application.Services;
 
-var services = new ServiceCollection();
+// 1. Configuração do Container de DI
+var serviceProvider = new ServiceCollection()
+    .AddScoped<ICepService, CepService>() // Infra no Domain
+    .AddScoped<ICepAppService, CepAppService>() // Application
+    .BuildServiceProvider();
 
-services.AddSingleton<ICepService, CepService>();
+// 2. Obtendo o serviço da camada de Application
+var appService = serviceProvider.GetRequiredService<ICepAppService>();
 
-var serviceProvider = services.BuildServiceProvider();
+Console.WriteLine("--- Consultor de CEP (Clean Architecture) ---");
+Console.Write("Digite o CEP: ");
+var input = Console.ReadLine();
 
-var cepService = serviceProvider.GetService<ICepService>();
-var dados = await cepService.GetAddressByCepAsync("01001000");
+try
+{
+    var endereco = await appService.BuscarEnderecoPorCepAsync(input ?? "");
 
-Console.WriteLine($"Endereço: {dados.Logradouro}, {dados.Bairro} - {dados.Localidade}/{dados.Uf}");
+    if (endereco != null)
+    {
+        Console.WriteLine($"\nSucesso: {endereco.Logradouro}, {endereco.Bairro}");
+        Console.WriteLine($"{endereco.Localidade} - {endereco.Uf}");
+    }
+    else
+    {
+        Console.WriteLine("\nCEP não encontrado.");
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"\nErro de validação: {ex.Message}");
+}
