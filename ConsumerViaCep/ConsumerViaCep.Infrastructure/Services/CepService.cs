@@ -9,11 +9,11 @@ public class CepService : ICepService
 {
     private const string BaseUrl = "https://viacep.com.br/ws";
 
-    public async Task<ViaCepResponse> GetAddressByCepAsync(string cep)
+    public async Task<ViaCepResponse> GetAddressByCepAsync(string cep, CancellationToken ct = default)
     {
         return await BaseUrl
             .AppendPathSegment(cep)
             .AppendPathSegment("json")
-            .GetJsonAsync<ViaCepResponse>();
+            .GetJsonAsync<ViaCepResponse>(cancellationToken: ct);
     }
 }

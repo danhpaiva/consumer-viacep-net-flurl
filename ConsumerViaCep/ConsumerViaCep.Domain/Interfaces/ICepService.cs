@@ -4,5 +4,5 @@ namespace ConsumerViaCep.Domain.Interfaces;
 
 public interface ICepService
 {
-    Task<ViaCepResponse> GetAddressByCepAsync(string cep);
+    Task<ViaCepResponse> GetAddressByCepAsync(string cep, CancellationToken ct = default);
 }
