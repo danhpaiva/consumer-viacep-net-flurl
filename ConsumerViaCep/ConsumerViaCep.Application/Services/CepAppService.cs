@@ -42,14 +42,14 @@ public class CepAppService : ICepAppService
 
             return resultado;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) // Captura timeout e cancelamento manual
         {
-            _logger.LogWarning("A busca do CEP {Cep} foi cancelada.", cep);
-            throw;
+            _logger.LogWarning("A busca do CEP {Cep} expirou ou foi cancelada pelo usuário.", cep);
+            throw; // Repassa para o Program.cs tratar a mensagem de tela
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro crítico ao buscar o CEP {Cep}", cep);
+            _logger.LogError(ex, "Erro não esperado ao buscar o CEP {Cep}", cep);
             throw;
         }
     }

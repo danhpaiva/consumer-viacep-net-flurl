@@ -31,15 +31,13 @@ try
 }
 catch (OperationCanceledException)
 {
-    Console.WriteLine("Erro: A operação demorou demais e foi cancelada.");
+    Console.WriteLine("\n⚠️  Serviço indisponível ou conexão lenta. Tente novamente mais tarde.");
 }
 catch (ArgumentException ex)
 {
-    Console.WriteLine($"Erro de Validação: {ex.Message}");
+    Console.WriteLine($"\n❌ {ex.Message}");
 }
-catch (Exception ex)
+catch (Exception)
 {
-    // Aqui capturamos qualquer erro não tratado (Global Handling)
-    Console.WriteLine("Ocorreu um erro inesperado no sistema. Contate o suporte.");
-    // O erro completo já foi logado pelo ILogger na Application
+    Console.WriteLine("\n🔥 Ocorreu um erro interno. Nossa equipe técnica já foi notificada.");
 }
