@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ConsumerViaCep.ConsoleApp": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

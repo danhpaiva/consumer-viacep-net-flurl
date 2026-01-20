@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ConsumerViaCep.Application/ConsumerViaCep.Application.csproj" />
+  <Project Path="ConsumerViaCep.ConsoleApp/ConsumerViaCep.ConsoleApp.csproj" />
+  <Project Path="ConsumerViaCep.Domain/ConsumerViaCep.Domain.csproj" />
+  <Project Path="ConsumerViaCep.Infrastructure/ConsumerViaCep.Infrastructure.csproj" />
+  <Project Path="ConsumerViaCep.Tests/ConsumerViaCep.Tests.csproj" />
+</Solution>
