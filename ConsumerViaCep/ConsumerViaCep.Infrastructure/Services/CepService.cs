@@ -11,9 +11,6 @@ public class CepService : ICepService
 
     public async Task<ViaCepResponse> GetAddressByCepAsync(string cep)
     {
-        if (string.IsNullOrWhiteSpace(cep))
-            throw new ArgumentException("CEP não pode ser vazio.");
-
         return await BaseUrl
             .AppendPathSegment(cep)
             .AppendPathSegment("json")
