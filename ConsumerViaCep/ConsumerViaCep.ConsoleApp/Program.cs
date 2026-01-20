@@ -1,37 +1,45 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ConsumerViaCep.Application.Interfaces;
+using ConsumerViaCep.Application.Services;
 using ConsumerViaCep.Domain.Interfaces;
 using ConsumerViaCep.Infrastructure.Services;
-using ConsumerViaCep.Application.Interfaces;
-using ConsumerViaCep.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-// 1. Configuração do Container de DI
-var serviceProvider = new ServiceCollection()
-    .AddScoped<ICepService, CepService>() // Infra no Domain
-    .AddScoped<ICepAppService, CepAppService>() // Application
-    .BuildServiceProvider();
+var services = new ServiceCollection();
 
-// 2. Obtendo o serviço da camada de Application
+// Configurando Logging para sair no Console
+services.AddLogging(configure => configure.AddConsole());
+
+services.AddScoped<ICepService, CepService>();
+services.AddScoped<ICepAppService, CepAppService>();
+
+var serviceProvider = services.BuildServiceProvider();
 var appService = serviceProvider.GetRequiredService<ICepAppService>();
 
-Console.WriteLine("--- Consultor de CEP (Clean Architecture) ---");
-Console.Write("Digite o CEP: ");
-var input = Console.ReadLine();
-
+// Global Exception Handling
 try
 {
-    var endereco = await appService.BuscarEnderecoPorCepAsync(input ?? "");
+    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)); // Timeout de 5s
 
-    if (endereco != null)
-    {
-        Console.WriteLine($"\nSucesso: {endereco.Logradouro}, {endereco.Bairro}");
-        Console.WriteLine($"{endereco.Localidade} - {endereco.Uf}");
-    }
-    else
-    {
-        Console.WriteLine("\nCEP não encontrado.");
-    }
+    Console.Write("Digite o CEP: ");
+    var input = Console.ReadLine();
+
+    var result = await appService.BuscarEnderecoPorCepAsync(input, cts.Token);
+
+    if (result != null)
+        Console.WriteLine($"Endereço: {result.Logradouro}");
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("Erro: A operação demorou demais e foi cancelada.");
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Erro de Validação: {ex.Message}");
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"\nErro de validação: {ex.Message}");
+    // Aqui capturamos qualquer erro não tratado (Global Handling)
+    Console.WriteLine("Ocorreu um erro inesperado no sistema. Contate o suporte.");
+    // O erro completo já foi logado pelo ILogger na Application
 }
